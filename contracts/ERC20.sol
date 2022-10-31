@@ -3,7 +3,7 @@
 
 pragma solidity 0.8.7;
 
-import "../contracts/LibraryFunction.sol";
+import {LibraryFunction} from "../contracts/LibraryFunction.sol";
 import "../contracts/IERC20.sol";
 
 contract ERC20 is IERC20{
@@ -30,7 +30,7 @@ contract ERC20 is IERC20{
      address dev_address = 0x583031D1113aD414F02576BD6afaBfb302140225;
      address charity_address = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C;
 
-     using LibraryFunction for uint256;
+     using LibraryFunction for *;
 
 // to set the values of name, symbol and total supply
 
@@ -121,7 +121,7 @@ contract ERC20 is IERC20{
      * @param spender, recipient and amount
      */
 
-    function _transfer(address spender, address recipient, uint256 amount) internal override{
+    function _transfer(address spender, address recipient, uint256 amount) internal {
         require(recipient != address(0), "Recipient address is zero account");
         require(spender != address(0), "Spender account is Zero account");
         require(balance_of[spender] >= amount,"Insufficient fund");
@@ -140,11 +140,11 @@ contract ERC20 is IERC20{
      */
 
     function taxReduction(uint256 amount) internal {
-       uint256 marketingPercentage = percentageCalculate(marketing_tx_percentage, amount);
+       uint256 marketingPercentage = marketing_tx_percentage.percentageCalculate(amount);
        totalMarketingPercentage += marketingPercentage;
-       uint256 devPercentage = percentageCalculate(dev_tx_percentage, amount);
+       uint256 devPercentage = dev_tx_percentage.percentageCalculate(amount);
        totalDevPercentage += devPercentage;
-       uint256 charityPercentage = percentageCalculate(charity_tx_percentage, amount);
+       uint256 charityPercentage = charity_tx_percentage.percentageCalculate(amount);
        totalCharityPercentage += charityPercentage;
        totalTaxPercentage = (marketingPercentage + devPercentage + charityPercentage);
         totalTaxValue = (totalMarketingPercentage + totalDevPercentage + totalCharityPercentage);
