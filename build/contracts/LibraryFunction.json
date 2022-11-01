@@ -15,15 +15,15 @@
     "absolutePath": "project:/contracts/LibraryFunction.sol",
     "exportedSymbols": {
       "LibraryFunction": [
-        734
+        737
       ]
     },
-    "id": 735,
+    "id": 738,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 713,
+        "id": 716,
         "literals": [
           "solidity",
           "0.8",
@@ -38,9 +38,9 @@
         "contractDependencies": [],
         "contractKind": "library",
         "fullyImplemented": true,
-        "id": 734,
+        "id": 737,
         "linearizedBaseContracts": [
-          734
+          737
         ],
         "name": "LibraryFunction",
         "nameLocation": "70:15:2",
@@ -48,23 +48,23 @@
         "nodes": [
           {
             "body": {
-              "id": 732,
+              "id": 735,
               "nodeType": "Block",
               "src": "190:110:2",
               "statements": [
                 {
                   "assignments": [
-                    723
+                    726
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 723,
+                      "id": 726,
                       "mutability": "mutable",
                       "name": "percentageValue",
                       "nameLocation": "209:15:2",
                       "nodeType": "VariableDeclaration",
-                      "scope": 732,
+                      "scope": 735,
                       "src": "201:23:2",
                       "stateVariable": false,
                       "storageLocation": "default",
@@ -73,7 +73,7 @@
                         "typeString": "uint256"
                       },
                       "typeName": {
-                        "id": 722,
+                        "id": 725,
                         "name": "uint256",
                         "nodeType": "ElementaryTypeName",
                         "src": "201:7:2",
@@ -85,13 +85,13 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 729,
+                  "id": 732,
                   "initialValue": {
                     "commonType": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     },
-                    "id": 728,
+                    "id": 731,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -101,17 +101,17 @@
                         "typeIdentifier": "t_uint256",
                         "typeString": "uint256"
                       },
-                      "id": 726,
+                      "id": 729,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "leftExpression": {
-                        "id": 724,
+                        "id": 727,
                         "name": "amount",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 717,
+                        "referencedDeclaration": 720,
                         "src": "227:6:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -121,11 +121,11 @@
                       "nodeType": "BinaryOperation",
                       "operator": "*",
                       "rightExpression": {
-                        "id": 725,
+                        "id": 728,
                         "name": "percent",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 715,
+                        "referencedDeclaration": 718,
                         "src": "236:7:2",
                         "typeDescriptions": {
                           "typeIdentifier": "t_uint256",
@@ -142,7 +142,7 @@
                     "operator": "/",
                     "rightExpression": {
                       "hexValue": "313030",
-                      "id": 727,
+                      "id": 730,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": true,
@@ -167,25 +167,25 @@
                 },
                 {
                   "expression": {
-                    "id": 730,
+                    "id": 733,
                     "name": "percentageValue",
                     "nodeType": "Identifier",
                     "overloadedDeclarations": [],
-                    "referencedDeclaration": 723,
+                    "referencedDeclaration": 726,
                     "src": "267:15:2",
                     "typeDescriptions": {
                       "typeIdentifier": "t_uint256",
                       "typeString": "uint256"
                     }
                   },
-                  "functionReturnParameters": 721,
-                  "id": 731,
+                  "functionReturnParameters": 724,
+                  "id": 734,
                   "nodeType": "Return",
                   "src": "260:22:2"
                 }
               ]
             },
-            "id": 733,
+            "id": 736,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
@@ -193,17 +193,17 @@
             "nameLocation": "107:19:2",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 718,
+              "id": 721,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 715,
+                  "id": 718,
                   "mutability": "mutable",
                   "name": "percent",
                   "nameLocation": "135:7:2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 733,
+                  "scope": 736,
                   "src": "127:15:2",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -212,7 +212,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 714,
+                    "id": 717,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "127:7:2",
@@ -225,12 +225,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 717,
+                  "id": 720,
                   "mutability": "mutable",
                   "name": "amount",
                   "nameLocation": "152:6:2",
                   "nodeType": "VariableDeclaration",
-                  "scope": 733,
+                  "scope": 736,
                   "src": "144:14:2",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -239,7 +239,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 716,
+                    "id": 719,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "144:7:2",
@@ -254,17 +254,17 @@
               "src": "126:33:2"
             },
             "returnParameters": {
-              "id": 721,
+              "id": 724,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 720,
+                  "id": 723,
                   "mutability": "mutable",
                   "name": "",
                   "nameLocation": "-1:-1:-1",
                   "nodeType": "VariableDeclaration",
-                  "scope": 733,
+                  "scope": 736,
                   "src": "181:7:2",
                   "stateVariable": false,
                   "storageLocation": "default",
@@ -273,7 +273,7 @@
                     "typeString": "uint256"
                   },
                   "typeName": {
-                    "id": 719,
+                    "id": 722,
                     "name": "uint256",
                     "nodeType": "ElementaryTypeName",
                     "src": "181:7:2",
@@ -287,14 +287,14 @@
               ],
               "src": "180:9:2"
             },
-            "scope": 734,
+            "scope": 737,
             "src": "98:202:2",
             "stateMutability": "pure",
             "virtual": false,
             "visibility": "internal"
           }
         ],
-        "scope": 735,
+        "scope": 738,
         "src": "62:248:2",
         "usedErrors": []
       }
@@ -307,7 +307,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.10",
-  "updatedAt": "2022-10-31T09:49:24.553Z",
+  "updatedAt": "2022-11-01T05:45:58.069Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

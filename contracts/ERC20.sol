@@ -5,8 +5,9 @@ pragma solidity 0.8.7;
 
 import {LibraryFunction} from "../contracts/LibraryFunction.sol";
 import "../contracts/IERC20.sol";
+import "../contracts/Payable.sol";
 
-contract ERC20 is IERC20{
+contract ERC20 is IERC20, Payable{
     string _name;
     string _symbol;
     uint256 _decimals = 18;
@@ -73,7 +74,7 @@ contract ERC20 is IERC20{
      * @param recipient and amount
      */
 
-    function transfer(address recipient, uint256 amount) external override transferAddress() returns(bool){
+    function transfer(address recipient, uint256 amount) external override onlyOwner returns(bool){
        _transfer(msg.sender, recipient, amount);
        return true;
     }
@@ -110,7 +111,7 @@ contract ERC20 is IERC20{
         taxReduction(amount);  
         return true;
     }
-    modifier transferAddress(){
+    modifier onlyOwner(){
         require(msg.sender == ownerOfTransation, "Only owner can transfer");
         _;
      }
@@ -272,5 +273,6 @@ function updateBurnPercentage(uint256 _burnPercentage) external {
             balance_of[charity_address] += totalCharityPercentage;
             totalTaxValue = 0;
     }
+    
 
 }
