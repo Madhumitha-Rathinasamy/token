@@ -3,17 +3,16 @@
 
 pragma solidity 0.8.7;
 
-import {LibraryFunction} from "../contracts/LibraryFunction.sol";
 import "../contracts/IERC20.sol";
-import "../contracts/Payable.sol";
 
-contract ERC20 is IERC20, Payable{
+contract ERC20 is IERC20{
     string _name;
     string _symbol;
     uint256 _decimals = 18;
     uint256 total_supply = 2000000000 * 10 ** _decimals;
     mapping(address => uint256) balance_of;
     mapping(address => mapping(address=> uint256)) _allowance;
+    address Owner;
 
     uint256 public marketing_tx_percentage = 1;
     uint256 public dev_tx_percentage= 2;
@@ -26,12 +25,14 @@ contract ERC20 is IERC20, Payable{
     uint256 public burnPercentage = 1;
     uint256 public totalTaxPercentage;
      address ownerOfTransation;
+     uint256 public transferTaxPercentage = 2;
+     uint256 public totalTransferTaxAmount;
+
 
      address marketing_address = 0xdD870fA1b7C4700F2BD7f44238821C26f7392148;
      address dev_address = 0x583031D1113aD414F02576BD6afaBfb302140225;
      address charity_address = 0x14723A09ACff6D2A60DcdF7aA4AFf308FDDC160C;
-
-     using LibraryFunction for *;
+     address addressOfTransferTax;
 
 // to set the values of name, symbol and total supply
 
@@ -39,7 +40,7 @@ contract ERC20 is IERC20, Payable{
         _name = "Spark Tokens";
         _symbol = "SPK"; 
         balance_of[msg.sender] = total_supply;
-        ownerOfTransation = 0x5705d286e8fc970ca5dFa5C480b708126b6FcB03;
+        // ownerOfTransation = 0x5705d286e8fc970ca5dFa5C480b708126b6FcB03;
     }
 
 // to view the name of a contract
@@ -56,16 +57,21 @@ contract ERC20 is IERC20, Payable{
         return _decimals;
     }
 // to view the total supply of a contract
-    function totalSupply() external view override returns(uint256){
+    function totalSupply() external override view returns(uint256){
         return total_supply;
     }
+
+        function transferTaxAmount()  public override view returns(uint256){
+            return totalTransferTaxAmount;
+        }
+
 
 /* 
      * @dev displace the balance of an given account
      * @param account
      */
 
-    function balanceOf(address account) public view override returns(uint256){
+    function balanceOf(address account) public override view returns(uint256){
         return balance_of[account];
     }
 
@@ -74,7 +80,7 @@ contract ERC20 is IERC20, Payable{
      * @param recipient and amount
      */
 
-    function transfer(address recipient, uint256 amount) external override onlyOwner returns(bool){
+    function transfer(address recipient, uint256 amount) external override returns(bool){
        _transfer(msg.sender, recipient, amount);
        return true;
     }
@@ -106,13 +112,13 @@ contract ERC20 is IERC20, Payable{
 
     function transferFrom(address sender, address recipient, uint256 amount) external override returns(bool){
         _approve(sender, recipient, amount);
-        spend_allowance(sender, recipient, amount);
+        _spendAllowance(sender, recipient, amount);
         balance_of[recipient] += amount;
         taxReduction(amount);  
         return true;
     }
     modifier onlyOwner(){
-        require(msg.sender == ownerOfTransation, "Only owner can transfer");
+        require(msg.sender == Owner, "Only owner can transfer");
         _;
      }
 
@@ -141,14 +147,15 @@ contract ERC20 is IERC20, Payable{
      */
 
     function taxReduction(uint256 amount) internal {
-       uint256 marketingPercentage = marketing_tx_percentage.percentageCalculate(amount);
+       uint256 marketingPercentage = percentageCalculate(marketing_tx_percentage, amount);
        totalMarketingPercentage += marketingPercentage;
-       uint256 devPercentage = dev_tx_percentage.percentageCalculate(amount);
+       uint256 devPercentage = percentageCalculate(dev_tx_percentage, amount);
        totalDevPercentage += devPercentage;
-       uint256 charityPercentage = charity_tx_percentage.percentageCalculate(amount);
+       uint256 charityPercentage = percentageCalculate(charity_tx_percentage, amount);
        totalCharityPercentage += charityPercentage;
        totalTaxPercentage = (marketingPercentage + devPercentage + charityPercentage);
         totalTaxValue = (totalMarketingPercentage + totalDevPercentage + totalCharityPercentage);
+        transferTaxCalculation(amount);
         if(totalTaxValue >= 100 * 10 ** 18){
         taxCalculation();
         totalMarketingPercentage = 0;
@@ -157,15 +164,16 @@ contract ERC20 is IERC20, Payable{
         }
     }
 
+  
     /* *
      * @dev calculate the percentage value
      * @param percent and amount
      */
 
-    // function percentageCalculate(uint256 percent, uint256 amount) internal pure returns(uint256){
-    //     uint256 percentageValue = amount * percent / 100;
-    //     return percentageValue;
-    // }
+    function percentageCalculate(uint256 percent, uint256 amount) internal pure returns(uint256){
+        uint256 percentageValue = amount * percent / 100;
+        return percentageValue;
+    }
 
     /* *
      * @dev add the amount to the allowance between spender and recipient
@@ -183,12 +191,19 @@ contract ERC20 is IERC20, Payable{
      * @param spender, recipient and amount
      */
 
-    function spend_allowance(address spender, address recipient, uint256 amount) internal {
-        require(_allowance[spender][recipient] >= amount,"Insufficient fund");
-        unchecked{
-            _allowance[spender][msg.sender] -= amount;
+     function _spendAllowance(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal virtual {
+        uint256 currentAllowance = allowance(owner, spender);
+        if (currentAllowance != type(uint256).max) {
+            require(currentAllowance >= amount, "ERC20: insufficient allowance");
+            unchecked {
+                _approve(owner, spender, currentAllowance - amount);
+            }
         }
-    } 
+    }
 
 /* *
      * @dev increase the allowance between owner and spender
@@ -196,7 +211,7 @@ contract ERC20 is IERC20, Payable{
      */
 
     function increaseAllowance(address spender, uint256 addedValue) external returns(bool){
-        _approve(msg.sender, spender, addedValue);
+        _approve(msg.sender, spender, _allowance[msg.sender][spender] + addedValue);
         return true;
     }
 
@@ -205,10 +220,17 @@ contract ERC20 is IERC20, Payable{
      * @param spender and addValue
      */
 
-    function decreaseAllowance(address spender, uint256 subtractedValue) external returns(bool){
-        spend_allowance(msg.sender, spender, subtractedValue);
+    function spendAllowance(address spender, uint256 subtractedValue) external returns(bool){
+       address owner = msg.sender;
+        uint256 currentAllowance = allowance(owner, spender);
+        require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
+        unchecked {
+            _approve(owner, spender, currentAllowance - subtractedValue);
+        }
+
         return true;
     }
+    
 
    /* *
      * @dev to increase the token of a contract
@@ -244,10 +266,10 @@ contract ERC20 is IERC20, Payable{
         charity_tx_percentage = charityTaxPercentage;
     }
 
- /* *
-     * @dev to update the wallet of the tax holder
-     * @param marketingAddress, devAddress and charityAddress
-     */ 
+//  /* *
+//      * @dev to update the wallet of the tax holder
+//      * @param marketingAddress, devAddress and charityAddress
+//      */ 
 
     function updateTaxHolderAddress(address marketingAddress, address devAddress, address charityAddress) external {
         marketing_address = marketingAddress;
@@ -264,7 +286,7 @@ function updateBurnPercentage(uint256 _burnPercentage) external {
     }
 
 
-     // add the tax amount to the tax holder
+//      // add the tax amount to the tax holder
 
     function taxCalculation() internal{
             
@@ -273,6 +295,12 @@ function updateBurnPercentage(uint256 _burnPercentage) external {
             balance_of[charity_address] += totalCharityPercentage;
             totalTaxValue = 0;
     }
-    
+        function transferTaxCalculation(uint256 amount) internal{
+        uint256 transferTax = percentageCalculate(transferTaxPercentage, amount);
+       totalTransferTaxAmount += transferTax;
+    //    if(balanceOfTransferTaxAmount>= 50){
+    //    }
+    }
+
 
 }
