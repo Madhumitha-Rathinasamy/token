@@ -18,7 +18,7 @@
  *
  */
 
- const HDWalletProvider = require('@truffle/hdwallet-provider');
+//  const HDWalletProvider = require('@truffle/hdwallet-provider');
  // const {mnemonic, apiKey, infuraKey} = require('./secret.json');
  
  module.exports = {
@@ -91,8 +91,8 @@
      //   timoutBlocks: 200,
      // },
      dashboard: {
-       port: 24012,
-       // network_id: 97
+       port: 24012
+      //  network_id: 97
  
      }
    },
@@ -105,7 +105,7 @@
    // Configure your compilers
    compilers: {
      solc: {
-       version: "0.8.7",    // Fetch exact version from solc-bin (default: truffle's version)
+       version: "0.8.17",    // Fetch exact version from solc-bin (default: truffle's version)
        docker: false,        // Use "0.5.1" you've installed locally with docker (default: false)
        settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
@@ -123,7 +123,8 @@
    ],
  
    api_keys: {
-     bscscan: "1WAWZXBJGTTAXGMQKZP49IG274HXZ26IUT"
+     bscscan: "TQVEDJ94XQ1BN45Y8C2YI8IC3VC9TSNS6Q"
+    //  ftmscan:'VVGQ5MPYG21P2Z27BH26IGFJUV9B92Q6XA'
     //  etherscan:"DK85CYKXHTJXFJAG6VFKXXTI5IDD9IMPCQ"
    }
  };
