@@ -84,10 +84,12 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
     uint256 private _totalSupply;
 
+    bool public checkPoint;
+
     string private _name;
     string private _symbol;
 
-    uint256 public taxPercentage = 1;
+    uint256 public taxPercentage = 10;
     uint256 public taxAmount;
     uint256 private previousTaxPercentage;
     uint256 public currentTaxFee;
@@ -96,6 +98,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     address public uniswapV2Pair;
 
     address PANCAKEV2ROUTER;
+
+    address public ownerOfTransation;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -111,6 +115,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _symbol = "mad";
         _totalSupply = 100000 * 10**18;
         _balances[msg.sender] = _totalSupply;
+        ownerOfTransation = msg.sender;
 
         // ownerOfTransation = 0x5705d286e8fc970ca5dFa5C480b708126b6FcB03;
         // UNISWAPV2ROUTER = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
@@ -142,6 +147,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return _symbol;
     }
 
+    modifier onlyOwner(){
+        ownerOfTransation;
+        _;
+    }
+
     /**
      * @dev Returns the number of decimals used to get its user representation.
      * For example, if `decimals` equals `2`, a balance of `505` tokens should
@@ -166,6 +176,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return _totalSupply;
     }
 
+    function setCheckPoint() public onlyOwner returns (bool)
+    {
+        checkPoint = !checkPoint;
+        return checkPoint;
+    }
     /**
      * @dev See {IERC20-balanceOf}.
      */
@@ -355,13 +370,20 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         // }
         //  bool takeFee = false;
 
-        if (from != uniswapV2Pair) {
+        if (from != uniswapV2Pair && !takeFee && checkPoint) {
+             if(taxAmount >= 100 ){
+                takeFee=true;
+                //uint256 swapToken = _balances[address(this)];
+                swapAndLiquify(taxAmount);
+                takeFee = false;
+            }
             taxCalculation(amount);
             // takeFee = true;
             _balances[from] = fromBalance - amount;
             _balances[to] += amount - currentTaxFee;
             _balances[address(this)] += currentTaxFee;
             taxAmount += currentTaxFee;
+            
         } else {
            // removeAllFee();
             _balances[from] = fromBalance - amount;
@@ -376,7 +398,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         //     if(!takeFee && from == uniswapV2Pair){
         //  restoringTheTaxValue();
         // }
+        emit Transfer(from, to, amount);
     }
+
+    
 
     // emit Transfer(from, to, amount);
 
@@ -391,6 +416,48 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      *
      * - `account` cannot be the zero address.
      */
+
+     function swapAndLiquify(uint256 contractTaxBalance) private {
+        uint256 half = contractTaxBalance / 2;
+        uint256 otherHalf = contractTaxBalance - half;
+        
+        uint256 initialBalance = address(this).balance;
+        swapTokenForEth(half);
+
+        uint256 newBalance = address(this).balance - initialBalance;
+
+        addLiquidity(otherHalf, newBalance);
+        taxAmount = 0;
+     }
+
+     function swapTokenForEth(uint256 tokenAmount) private {
+        address[] memory path = new address[](2);
+        path[0] = address(this);
+        path[1] = uniswapV2Router.WETH();
+
+        _approve(address(this), address(uniswapV2Router), tokenAmount);
+
+        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            tokenAmount,
+            0, // accept any amount of ETH
+            path,
+            address(this),
+            block.timestamp
+        );
+     }
+
+      function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
+        _approve(address(this), address(uniswapV2Router), tokenAmount);
+
+        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+            address(this),
+            tokenAmount,
+            0, // slippage is unavoidable
+            0, // slippage is unavoidable
+            msg.sender,
+            block.timestamp
+        );
+      }
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
 
@@ -536,4 +603,6 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     // function restoringTheTaxValue() internal {
     //     taxPercentage = previousTaxPercentage;
     // }
+
+
 }
