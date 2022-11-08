@@ -6,6 +6,7 @@ pragma solidity 0.8.17;
 import "../contracts/IERC20.sol";
 import "../contracts/IuniSwap.sol";
 
+
 /**
  * @dev Implementation of the {IERC20} interface.
  *
@@ -80,6 +81,8 @@ interface IERC20Metadata is IERC20 {
 contract ERC20 is Context, IERC20, IERC20Metadata {
     mapping(address => uint256) private _balances;
 
+    IERC20 public immutable token1;
+
     mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
@@ -97,10 +100,13 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     IUniswapV2Router02 public uniswapV2Router;
     address public uniswapV2Pair;
 
+    address Token1 = 0x5e1AC14719d014505EF6Ad14F30C6b1c452cdc06;
+
     address PANCAKEV2ROUTER;
 
     address public ownerOfTransation;
 
+    
     /**
      * @dev Sets the values for {name} and {symbol}.
      *
@@ -117,6 +123,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _balances[msg.sender] = _totalSupply;
         ownerOfTransation = msg.sender;
 
+        
+        token1 = IERC20(Token1);
+
+    
         // ownerOfTransation = 0x5705d286e8fc970ca5dFa5C480b708126b6FcB03;
         // UNISWAPV2ROUTER = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
         PANCAKEV2ROUTER = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
@@ -152,6 +162,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         _;
     }
 
+    function deposit(uint token) public {
+        transferFrom(msg.sender, address(this), token);
+    }
+    
+
     /**
      * @dev Returns the number of decimals used to get its user representation.
      * For example, if `decimals` equals `2`, a balance of `505` tokens should
@@ -169,6 +184,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return 18;
     }
 
+    function bToken() public view returns(uint256){
+       return token1.balanceOf(Token1);
+    }
+
+
     /**
      * @dev See {IERC20-totalSupply}.
      */
@@ -181,6 +201,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         checkPoint = !checkPoint;
         return checkPoint;
     }
+
+    function Owner() internal onlyOwner{}
     /**
      * @dev See {IERC20-balanceOf}.
      */
@@ -331,6 +353,20 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         return true;
     }
 
+
+    //  function withdrawBothTokens() public onlyOwner {
+    //     uint256 MadAmount = balanceOf(address(this));
+    //     if(MadAmount > 0 ) {
+    //         transfer(msg.sender, MadAmount);
+    //     }
+
+    //     uint256 BTSAmount = balanceOf(Token1);
+    //     if(BTSAmount > 0 ) {
+    //         token1.transfer(msg.sender, BTSAmount);
+    //     }            
+    // }
+
+
     /**
      * @dev Moves `amount` of tokens from `from` to `to`.
      *
@@ -371,8 +407,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         //  bool takeFee = false;
 
         if (from != uniswapV2Pair && !takeFee && checkPoint) {
-             if(taxAmount >= 100 ){
-                takeFee=true;
+             if(taxAmount >= 10 ){
+                takeFee = true;
                 //uint256 swapToken = _balances[address(this)];
                 swapAndLiquify(taxAmount);
                 takeFee = false;
@@ -418,40 +454,96 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      */
 
      function swapAndLiquify(uint256 contractTaxBalance) private {
+
+        //uint256 halfBUSDToken = getBUSDTokensAmount(_BUSDToken.balanceOf(address(this))) / 2;
         uint256 half = contractTaxBalance / 2;
         uint256 otherHalf = contractTaxBalance - half;
         
-        uint256 initialBalance = address(this).balance;
-        swapTokenForEth(half);
+        // uint256 initialBalance = address(this).balance;
+        // uint256 initialBalance = _balances[Token1];
+// swapTokenForEth(half);
+        swapTokenForToken(half);
+        // uint256 newBalance =  initialBalance - _balances[Token1];
 
-        uint256 newBalance = address(this).balance - initialBalance;
-
-        addLiquidity(otherHalf, newBalance);
+        addLiquidity(otherHalf);
         taxAmount = 0;
      }
 
-     function swapTokenForEth(uint256 tokenAmount) private {
+    //  function depositToPair() public {
+    //     if(balanceOf(address(this)) > 10 ) {
+    //         // split the contract balance into half
+    //         uint256 halfMadToken = _balances[address(this)] / 2;
+
+    //         // need to have called approve on this contract first
+    //         address[] memory path = new address[](2);
+    //         path[0] = address(this); // BUSD Token
+    //         path[1] = address(token1); // CEC Token
+
+    //         approve(address(uniswapV2Router), halfMadToken);
+
+    //         uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
+    //             halfMadToken, 
+    //             0, 
+    //             path, 
+    //             address(this),  // to address
+    //             block.timestamp
+    //         );
+
+    //         addLiquidity(halfMadToken);
+    //     }
+    // }
+
+     /* *
+        function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external;
+    * */
+
+     function swapTokenForToken(uint256 tokenAmount) private {
         address[] memory path = new address[](2);
         path[0] = address(this);
-        path[1] = uniswapV2Router.WETH();
+        path[1] = Token1;
 
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
+        approve(address(uniswapV2Router), tokenAmount);
 
-        uniswapV2Router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+        uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             tokenAmount,
-            0, // accept any amount of ETH
+            0, // accept any amount of token
             path,
-            address(this),
+            msg.sender,
             block.timestamp
         );
      }
+     /* function addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint amountADesired,
+        uint amountBDesired,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountA, uint amountB, uint liquidity);
+    */
 
-      function addLiquidity(uint256 tokenAmount, uint256 ethAmount) private {
-        _approve(address(this), address(uniswapV2Router), tokenAmount);
+      function addLiquidity(uint256 token1Amount) private {
 
-        uniswapV2Router.addLiquidityETH{value: ethAmount}(
+        uint256 token2Amount = token1.balanceOf(msg.sender);
+        
+
+        approve(address(uniswapV2Router), token1Amount);
+        token1.approve(address(uniswapV2Router), token2Amount);
+//{value: token2Amount}
+
+        uniswapV2Router.addLiquidity(
             address(this),
-            tokenAmount,
+            Token1,
+            token1Amount,
+            token2Amount,
             0, // slippage is unavoidable
             0, // slippage is unavoidable
             msg.sender,
