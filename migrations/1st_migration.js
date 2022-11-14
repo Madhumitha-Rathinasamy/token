@@ -1,4 +1,4 @@
-const token = artifacts.require("ERC20");
+const token = artifacts.require("crowdSale1");
 // const transferTx = artifacts.require("TransferTx");
 
 module.exports = function (deployer) {
