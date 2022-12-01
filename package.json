@@ -2,7 +2,31 @@
   "dependencies": {
     "@openzeppelin/contracts": "^4.7.3",
     "@truffle/hdwallet-provider": "^2.1.0",
+    "chai": "^4.3.7",
     "truffle": "^5.6.2",
     "truffle-plugin-verify": "^0.5.31"
-  }
+  },
+  "name": "cd",
+  "version": "1.0.0",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "devDependencies": {
+    "mocha": "^9.2.2"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Madhumitha-Rathinasamy/token.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Madhumitha-Rathinasamy/token/issues"
+  },
+  "homepage": "https://github.com/Madhumitha-Rathinasamy/token#readme",
+  "description": ""
 }
